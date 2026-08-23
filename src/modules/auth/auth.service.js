@@ -1,4 +1,4 @@
-const authModule = require("./auth.validation");
+const authModule = require("./auth.validator");
 const register = async () => {};
 const login = async () => {};
 const logout = async () => {};
