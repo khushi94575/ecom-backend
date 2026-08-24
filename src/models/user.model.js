@@ -37,16 +37,14 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      requires: true,
+      required: true,
       minlength: 6,
       maxlength: 126,
-      select: false,
     },
     phone: {
-      type: Number,
+      type: String,
       minlength: 10,
-      maxlength: 14,
-      required: true,
+      maxlength: 14
     },
     role: {
       type: String,

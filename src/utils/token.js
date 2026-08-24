@@ -26,5 +26,6 @@ const verifyRefreshToken = (token) =>
 module.exports = {
   signAccessToken,
   signRefreshToken,
-  refreshCookieOptions
+  refreshCookieOptions,
+  verifyAccessToken
 };

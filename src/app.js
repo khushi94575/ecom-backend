@@ -11,7 +11,7 @@ const asyncHandler = require("./utils/asyncHandler");
 const { apiError } = require("./utils/apiError");
 
 app.use(express.json());
-app.use("/auth",AuthRouter);
+app.use("/api/v1/auth",AuthRouter);
 // app.use(helmet());
 // app.use(cors({ origin: process.env.CORS_ORIGIN, Credential: true }));
 app.use(cookieParser());
