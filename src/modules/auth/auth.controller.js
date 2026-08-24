@@ -1,6 +1,21 @@
-const registerController=async(req,res)=>{
+const apiResponse = require("../../utils/apiResponse");
+const asyncHandler = require("../../utils/asyncHandler");
+const { refreshCookieOptions } = require("../../utils/token");
+const AuthService=require("./auth.service");
+const registerController=asyncHandler(async(req,res)=>{
+//trycatch --> asyncHandler
+//req.body
+//user.exist?
+//hash password
+//token gerneration
+//response -->apiResponse
+const {name,email,password,role}=req.body;
+const result =await AuthService.registerController({name, email,password});
+res.cookie(result.tokens,refreshCookieOptions)
+res.status(201).json(apiResponse(201,result.user,"user creted successfully"))
+})
 
-}
+
 const loginController=async(req,res)=>{
 
 }

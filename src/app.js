@@ -7,6 +7,8 @@ require("dotenv").config();
 const cookieParser = require("cookie-parser");
 // const mongoSanitization = require("express-mongo-sanitize");
 const apiResponse = require("./utils/apiResponse");
+const asyncHandler = require("./utils/asyncHandler");
+const { apiError } = require("./utils/apiError");
 
 app.use(express.json());
 app.use("/auth",AuthRouter);
@@ -29,5 +31,8 @@ app.get("/api/v1/health", (req, res) =>
     ),
   ),
 );
+app.get('/api/v1/boom',asyncHandler(async()=>{
+  throw apiError(418,'This error throw on purpose')
+}))
 
 module.exports = app;
