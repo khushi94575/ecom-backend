@@ -1,71 +1,134 @@
-const userModel = require("../../models/user.model");
-const { apiError } = require("../../utils/apiError");
-const authModule = require("./auth.validator");
+const RefreshModel = require("../../models/refresh.model");
+const UserModel = require("../../models/user.model");
+const apiError = require("../../utils/apiError");
+const { CONFLICT, BAD_REQUEST, NOT_FOUND } = require("../../utils/httpStatus");
 const { hashPassword, verifyPassword } = require("../../utils/password");
 const { signAccessToken, signRefreshToken } = require("../../utils/token");
-const { BAD_REQUEST } = require("../../utils/httpStatus");
-const register = async (data) => {
-  console.log(data, "body data");
 
-  const { name, email, password, role } = data;
+// register Api service
+const registerService = async (data) => {
 
-  const isExist = await userModel.findOne({ email });
+    console.log(data, "body data");
+    const { name, email, password, role } = data;
 
-  if (isExist) {
-    return apiError(409, "user Already exist");
-  }
+    const isExist = await UserModel.findOne({ email });
+    if (isExist) {
+        throw apiError(409, "User Already exist")
+    };
 
-  const hashpassword =  await hashPassword(password);
+    const hash = await hashPassword(password);
+    const userData = {
+        name: name,
+        email: email,
+        password: hash,
+        role: role
+    }
 
-  const userData = {
-    name,
-    email,
-    password: hashpassword,
-    role,
-  };
-
-  const user = await userModel.create(userData);
-
-  const accessToken = signAccessToken(user);
-  const refreshToken = signRefreshToken(user);
-
-  return {
-    user,
-    tokens: {
-      access: accessToken,
-      refresh: refreshToken,
-    },
-  };
+    const user = await UserModel.create(userData);
+    return { user }
 };
-const login = async (data) => {
-const {email,password}=data;
-const isUser=await userModel.findOne({email});
-if(!isUser){
-throw apiError(BAD_REQUEST,"Incorrect Credentials")
-};
-const isPasswordCorrect= await verifyPassword(password,isUser.password);
-if(!isPasswordCorrect){
-    throw apiError(BAD_REQUEST,"Incorrect Credentials");
+
+
+const createRefreshService = async (data) => {
+    const { userId, token } = data;
+
+
+    await RefreshModel.deleteMany({
+        user: userId
+    });
+
+    const refreshData = await RefreshModel.create({
+        user: userId,
+        token: token,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    });
+    return refreshData;
+
+
 }
-  const accessToken = signAccessToken(isUser);
-  const refreshToken = signRefreshToken(isUser);
-  return {
-    user: isUser,
-    tokens: {
-      access: accessToken,
-      refresh: refreshToken,
-    },
-  };
+
+// login Api service
+
+// req.body --> user exist, 
+// password check 
+// genertate tokens
+// response 
+const loginService = async (data) => {
+    const { email, password } = data;
+console.log("service data",data)
+    // user exist (email check)
+    const isUser = await UserModel.findOne({ email }).select("+password");
+    if (!isUser) {
+        throw apiError(BAD_REQUEST, "email Incorrect Credentials")
+    };
+
+    // password check 
+    const isPasswordCorrect = await verifyPassword(password, isUser.password);
+    if (!isPasswordCorrect) {
+        throw apiError(BAD_REQUEST, " passowrd Incorrect Credentials")
+    }
+
+    return { user: isUser }
 };
-const logout = async () => {};
-const refresh = async () => {};
-const me = async () => {};
-const changepassword = async () => {};
+
+// logout Api service
+const logoutService = async (user) => {
+console.log("logoutservice data",user)
+    await RefreshModel.deleteMany({
+        user: user.userID
+    });
+};
+
+// refresh Api service
+const refreshService = async () => {
+
+};
+
+
+// changePassword Api service
+
+// old and new password 
+// check old password sahi hai ya nhi 
+// hash new password 
+// save to database
+const changePasswordService = async (data) => {
+const {userId,newPassword, oldPassword}=data;
+
+// get user document with hashedPassword
+const user= await UserModel.findById(userId).select("+password");
+
+if(!user){
+    throw apiError(NOT_FOUND,"user not found")
+};
+
+// verify oldpassword 
+const decode = verifyPassword(oldPassword,user.password);
+
+if(!decode){
+    throw apiError(NOT_FOUND,"Invalid password")
+}
+// hash new password
+const hashNewPassword = await hashPassword(newPassword);
+
+// user me update new password field 
+user.password = hashNewPassword;
+await user.save();
+
+};
+
+
+const getUserDataById = async(data)=>{
+    const user = await UserModel.findById(data);
+    return user;
+}
+
 module.exports = {
-  register,
-  login,
-  logout,
-  refresh,
-  me,
-  changepassword,
-};
+    refreshService,
+    registerService,
+    loginService,
+    logoutService,
+    changePasswordService,
+    createRefreshService,
+    getUserDataById
+
+}
