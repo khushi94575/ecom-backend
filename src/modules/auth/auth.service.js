@@ -2,6 +2,10 @@ const RefreshModel = require("../../models/refresh.model");
 const UserModel = require("../../models/user.model");
 const apiError = require("../../utils/apiError");
 const { CONFLICT, BAD_REQUEST, NOT_FOUND } = require("../../utils/httpStatus");
+const RefreshModel = require("../../models/refresh.model");
+const UserModel = require("../../models/user.model");
+const apiError = require("../../utils/apiError");
+const { CONFLICT, BAD_REQUEST, NOT_FOUND } = require("../../utils/httpStatus");
 const { hashPassword, verifyPassword } = require("../../utils/password");
 const { signAccessToken, signRefreshToken } = require("../../utils/token");
 
