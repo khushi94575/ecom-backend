@@ -10,6 +10,13 @@ const signRefreshToken = (user) =>
   jwt.sign({ sub: String(user._id) }, process.env.REFRESH_TOKEN_SECRET, {
     expiresIn: process.env.REFRESH_TOKEN_EXPIRY || "7d",
   });
+  const accessCookieOptions = () => ({
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  path: "/api/v1",
+  maxAge: 15 * 60 * 60 * 1000,
+});
 const refreshCookieOptions = () => ({
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
@@ -25,6 +32,7 @@ const verifyRefreshToken = (token) =>
 
 module.exports = {
   signAccessToken,
+  accessCookieOptions,
   signRefreshToken,
   refreshCookieOptions,
   verifyAccessToken

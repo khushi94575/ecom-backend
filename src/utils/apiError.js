@@ -6,4 +6,4 @@
     err.isApiError = true;
     return err ;
 };
-module.exports ={ apiError};
+module.exports =apiError;
